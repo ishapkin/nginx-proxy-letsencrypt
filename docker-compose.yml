@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./htpasswd:/etc/nginx/htpasswd
+      - ./vhost.d:/etc/nginx/vhost.d
+      - /etc/nginx/certs
+      - /usr/share/nginx/html
+      - ./proxy_settings.conf:/etc/nginx/conf.d/proxy_settings.conf
+networks:
+  default:
+    external:
+      name: nginx-proxy
