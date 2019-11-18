@@ -1,0 +1,4 @@
+.idea
+htpasswd/*
+vhost.d/*
+!vhost.d/default
