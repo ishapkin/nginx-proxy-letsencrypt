@@ -2,3 +2,4 @@
 htpasswd/*
 vhost.d/*
 !vhost.d/default
+ .DS_Store
