@@ -55,3 +55,7 @@ networks:
       name: nginx-proxy
 
 ```
+
+# TODO:
+### HTTP basic auth
+### Redirect from www 
