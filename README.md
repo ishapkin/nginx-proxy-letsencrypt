@@ -9,7 +9,7 @@
 
 ### Клонируем прокси в /srv/ или любую другую удоную папку
 ```bash
-    git clone git@gitlab.shiawasedo.co.jp:shiawasedo/smmpost.git /srv/proxy
+    git clone git@github.com:ishapkin/nginx-proxy-letsencrypt.git /srv/proxy
 ```
 
 ### Создаем сеть nginx-proxy
