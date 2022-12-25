@@ -42,11 +42,11 @@ services:
     restart: always
     environment:
       # Хост для прокси
-      VIRTUAL_HOST: chromium.darom.jp
+      VIRTUAL_HOST: example.com
       # Хост для letsencrypt
-      LETSENCRYPT_HOST: chromium.darom.jp
+      LETSENCRYPT_HOST: example.com
       # Хост для letsencrypt email админа
-      LETSENCRYPT_EMAIL: shapkin@shiawasedo.co.jp
+      LETSENCRYPT_EMAIL: email@example.com
 
 # Подключаем сеть с прокси
 networks:
