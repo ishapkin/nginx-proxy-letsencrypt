@@ -14,7 +14,7 @@
 
 ### Создаем сеть nginx-proxy
 ```bash
-    docker create network nginx-proxy
+    docker network create nginx-proxy
 ```
 
 ### Собираем контейнер с прокси 
