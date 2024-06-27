@@ -1,7 +1,9 @@
 # Docker + nginx-proxy + letsencrypt
 
 Проект (далее прокси) предназначен для быстрого развертывания nginx с автоматиески обновляемыми сертифкатами от Letsencrypt.
+
 Не стоит ставить это на уже готовый вебсервер, так порты будут конфликтовать
+
 Подходит для разворачивания микросервисной архитектуры на новой машине или рядом с апачом
 
 ### Требования:
@@ -25,6 +27,35 @@
 ### Собираем контейнер с letsencrypt
 ```bash
     ./letsencrypt_build.sh
+```
+
+### Редирект с www
+
+На примере домена example.com
+
+Добавить в vhost.d файл www.exmaple.com содержимым
+
+```nginxconf
+if ($request_uri !~ "^/.well-known/acme-challenge")
+{
+  return 301 https://example.com;
+}
+```
+
+Перезапустить контейнер
+
+```bash
+    docker-compose restart
+```
+
+### Basic Auth
+
+На примере домена example.com
+
+Для базовой авторизации создать пару логин-пароль в папке 
+
+```bash
+  htpasswd -c htpasswd/exampe.com sammy
 ```
 
 ### Пример использования:
@@ -54,8 +85,4 @@ networks:
     external:
       name: nginx-proxy
 
-```
-
-# TODO:
-### HTTP basic auth
-### Redirect from www 
+``` 
