@@ -33,7 +33,7 @@
 
 На примере домена example.com
 
-Добавить в vhost.d файл www.exmaple.com содержимым
+Добавить в vhost.d файл www.exmaple.com c содержимым
 
 ```nginxconf
 if ($request_uri !~ "^/.well-known/acme-challenge")
