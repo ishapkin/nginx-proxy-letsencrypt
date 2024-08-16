@@ -9,7 +9,7 @@
 ### Требования:
 Любая ось на которой работает docker + docker-compose
 
-### Клонируем прокси в /srv/ или любую другую удоную папку
+### Клонируем прокси в /srv/ или любую другую удобную папку
 ```bash
     git clone git@github.com:ishapkin/nginx-proxy-letsencrypt.git /srv/proxy
 ```
