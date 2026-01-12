@@ -24,11 +24,6 @@
     docker-compose up -d --build
 ```
 
-### Собираем контейнер с letsencrypt
-```bash
-    ./letsencrypt_build.sh
-```
-
 ### Редирект с www
 
 На примере домена example.com
@@ -81,8 +76,8 @@ services:
 
 # Подключаем сеть с прокси
 networks:
-  default:
-    external:
-      name: nginx-proxy
+  nginx-proxy:
+    external: true
+    name: nginx-proxy
 
 ``` 
