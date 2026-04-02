@@ -1,6 +1,9 @@
 .idea
 .env
+.DS_Store
+certs/
+acme/
+html/
 htpasswd/*
 vhost.d/*
 !vhost.d/default
-.DS_Store

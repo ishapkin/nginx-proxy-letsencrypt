@@ -36,7 +36,6 @@ Edit `.env` and set your values:
 |----------|-------------|---------|
 | `DEFAULT_EMAIL` | Email for Let's Encrypt notifications | `admin@example.com` |
 | `NGINX_PROXY_CONTAINER` | Name of the proxy container | `nginx-proxy` |
-| `CLIENT_MAX_BODY_SIZE` | Max upload size (set in `proxy_settings.conf`) | `100M` |
 
 ### 3. Create the Docker network
 
@@ -54,6 +53,14 @@ docker-compose up -d
 
 To proxy a service, add it to the `nginx-proxy` network and set the required environment variables.
 
+Add the following variables to the service's `.env` file:
+
+```dotenv
+VIRTUAL_HOST=example.com
+LETSENCRYPT_HOST=example.com
+LETSENCRYPT_EMAIL=admin@example.com
+```
+
 Example `docker-compose.yml` for a backend service:
 
 ```yaml
@@ -66,9 +73,9 @@ services:
       - 443
     restart: always
     environment:
-      VIRTUAL_HOST: example.com
-      LETSENCRYPT_HOST: example.com
-      LETSENCRYPT_EMAIL: admin@example.com
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     networks:
       - nginx-proxy
 
@@ -113,13 +120,16 @@ The credentials file is automatically mounted into nginx.
 ├── docker-compose.yml      # Proxy and ACME companion services
 ├── .env                    # Environment variables (not tracked by git)
 ├── .env.example            # Example environment file
-├── proxy_settings.conf     # Global nginx settings (e.g. max body size)
+├── proxy_settings.conf     # Global nginx settings (e.g. client_max_body_size)
 ├── certs/                  # SSL certificates (auto-generated)
+├── acme/                   # ACME state (auto-generated)
 ├── html/                   # ACME challenge files
 ├── vhost.d/                # Per-domain nginx configs
 │   └── default             # ACME challenge endpoint
 └── htpasswd/               # Basic auth credentials per domain
 ```
+
+> To change the max upload size, edit `proxy_settings.conf` directly and restart the proxy.
 
 ## Architecture
 

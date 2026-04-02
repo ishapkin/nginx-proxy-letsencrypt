@@ -36,7 +36,6 @@ cp .env.example .env
 |------------|----------|--------------|
 | `DEFAULT_EMAIL` | Email для уведомлений Let's Encrypt | `admin@example.com` |
 | `NGINX_PROXY_CONTAINER` | Имя контейнера прокси | `nginx-proxy` |
-| `CLIENT_MAX_BODY_SIZE` | Макс. размер загрузки (в `proxy_settings.conf`) | `100M` |
 
 ### 3. Создать Docker-сеть
 
@@ -54,6 +53,14 @@ docker-compose up -d
 
 Чтобы проксировать сервис, подключите его к сети `nginx-proxy` и задайте переменные окружения.
 
+Добавьте переменные в `.env` файл сервиса:
+
+```dotenv
+VIRTUAL_HOST=example.com
+LETSENCRYPT_HOST=example.com
+LETSENCRYPT_EMAIL=admin@example.com
+```
+
 Пример `docker-compose.yml` для сервиса:
 
 ```yaml
@@ -66,9 +73,9 @@ services:
       - 443
     restart: always
     environment:
-      VIRTUAL_HOST: example.com
-      LETSENCRYPT_HOST: example.com
-      LETSENCRYPT_EMAIL: admin@example.com
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     networks:
       - nginx-proxy
 
@@ -113,13 +120,16 @@ htpasswd -c htpasswd/example.com username
 ├── docker-compose.yml      # Сервисы прокси и ACME companion
 ├── .env                    # Переменные окружения (не в git)
 ├── .env.example            # Пример файла переменных
-├── proxy_settings.conf     # Глобальные настройки nginx (макс. размер тела запроса)
+├── proxy_settings.conf     # Глобальные настройки nginx (client_max_body_size)
 ├── certs/                  # SSL-сертификаты (генерируются автоматически)
+├── acme/                   # Состояние ACME (генерируется автоматически)
 ├── html/                   # Файлы ACME challenge
 ├── vhost.d/                # Конфигурации nginx для каждого домена
 │   └── default             # Эндпоинт ACME challenge
 └── htpasswd/               # Пароли Basic Auth по доменам
 ```
+
+> Чтобы изменить максимальный размер загрузки, отредактируйте `proxy_settings.conf` и перезапустите прокси.
 
 ## Архитектура
 

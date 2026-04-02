@@ -1,5 +1,3 @@
-version: "3.3"
-
 services:
   nginx-proxy:
     image: nginxproxy/nginx-proxy:latest
@@ -14,6 +12,8 @@ services:
       - ./certs:/etc/nginx/certs:rw
       - ./vhost.d:/etc/nginx/vhost.d:rw
       - ./html:/usr/share/nginx/html:rw
+      - ./htpasswd:/etc/nginx/htpasswd:ro
+      - ./proxy_settings.conf:/etc/nginx/conf.d/proxy_settings.conf:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
   acme-companion:
@@ -29,6 +29,7 @@ services:
       - ./certs:/etc/nginx/certs:rw
       - ./vhost.d:/etc/nginx/vhost.d:rw
       - ./html:/usr/share/nginx/html:rw
+      - ./acme:/etc/acme.sh:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
 networks:
