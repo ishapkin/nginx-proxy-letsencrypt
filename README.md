@@ -1,83 +1,136 @@
-# Docker + nginx-proxy + letsencrypt
+# Docker + nginx-proxy + Let's Encrypt
 
-Проект (далее прокси) предназначен для быстрого развертывания nginx с автоматиески обновляемыми сертифкатами от Letsencrypt.
+Automated reverse proxy with free SSL certificates via Let's Encrypt.
 
-Не стоит ставить это на уже готовый вебсервер, так порты будут конфликтовать
+[Russian version / Русская версия](README.ru.md)
 
-Подходит для разворачивания микросервисной архитектуры на новой машине или рядом с апачом
+## Overview
 
-### Требования:
-Любая ось на которой работает docker + docker-compose
+This project provides a Docker-based nginx reverse proxy with automatic SSL certificate provisioning and renewal using Let's Encrypt. It is designed for deploying microservice architectures on a fresh server or alongside an existing Apache installation.
 
-### Клонируем прокси в /srv/ или любую другую удобную папку
-```bash
-    git clone git@github.com:ishapkin/nginx-proxy-letsencrypt.git /srv/proxy
-```
+**Do not install on a server that already uses ports 80/443** -- they will conflict.
 
-### Создаем сеть nginx-proxy
-```bash
-    docker network create nginx-proxy
-```
+## Requirements
 
-### Собираем контейнер с прокси 
-```bash
-    docker-compose up -d --build
-```
+- Docker
+- Docker Compose
 
-### Редирект с www
+## Quick Start
 
-На примере домена example.com
-
-Добавить в vhost.d файл www.exmaple.com c содержимым
-
-```nginxconf
-if ($request_uri !~ "^/.well-known/acme-challenge")
-{
-  return 301 https://example.com;
-}
-```
-
-Перезапустить контейнер
+### 1. Clone the repository
 
 ```bash
-    docker-compose restart
+git clone git@github.com:ishapkin/nginx-proxy-letsencrypt.git /srv/proxy
+cd /srv/proxy
 ```
 
-### Basic Auth
-
-На примере домена example.com
-
-Для базовой авторизации создать пару логин-пароль в папке 
+### 2. Configure environment
 
 ```bash
-  htpasswd -c htpasswd/exampe.com sammy
+cp .env.example .env
 ```
 
-### Пример использования:
+Edit `.env` and set your values:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DEFAULT_EMAIL` | Email for Let's Encrypt notifications | `admin@example.com` |
+| `NGINX_PROXY_CONTAINER` | Name of the proxy container | `nginx-proxy` |
+| `CLIENT_MAX_BODY_SIZE` | Max upload size (set in `proxy_settings.conf`) | `100M` |
+
+### 3. Create the Docker network
+
+```bash
+docker network create nginx-proxy
+```
+
+### 4. Start the proxy
+
+```bash
+docker-compose up -d
+```
+
+## Adding Backend Services
+
+To proxy a service, add it to the `nginx-proxy` network and set the required environment variables.
+
+Example `docker-compose.yml` for a backend service:
+
 ```yaml
-version: '3'
-
 services:
   webserver:
     image: nginx:alpine
     container_name: example-webserver
-     # пробрасываем порты 80 и 443 для работы прокси
     expose:
       - 80
       - 443
     restart: always
     environment:
-      # Хост для прокси
       VIRTUAL_HOST: example.com
-      # Хост для letsencrypt
       LETSENCRYPT_HOST: example.com
-      # Хост для letsencrypt email админа
-      LETSENCRYPT_EMAIL: email@example.com
+      LETSENCRYPT_EMAIL: admin@example.com
+    networks:
+      - nginx-proxy
 
-# Подключаем сеть с прокси
 networks:
   nginx-proxy:
     external: true
     name: nginx-proxy
+```
 
-``` 
+> Use `expose` instead of `ports` -- the proxy handles external traffic.
+
+## WWW Redirect
+
+To redirect `www.example.com` to `example.com`, create the file `vhost.d/www.example.com`:
+
+```nginx
+if ($request_uri !~ "^/.well-known/acme-challenge") {
+    return 301 https://example.com;
+}
+```
+
+Then restart:
+
+```bash
+docker-compose restart
+```
+
+## Basic Authentication
+
+To enable HTTP Basic Auth for a domain:
+
+```bash
+htpasswd -c htpasswd/example.com username
+```
+
+The credentials file is automatically mounted into nginx.
+
+## Project Structure
+
+```
+.
+├── docker-compose.yml      # Proxy and ACME companion services
+├── .env                    # Environment variables (not tracked by git)
+├── .env.example            # Example environment file
+├── proxy_settings.conf     # Global nginx settings (e.g. max body size)
+├── certs/                  # SSL certificates (auto-generated)
+├── html/                   # ACME challenge files
+├── vhost.d/                # Per-domain nginx configs
+│   └── default             # ACME challenge endpoint
+└── htpasswd/               # Basic auth credentials per domain
+```
+
+## Architecture
+
+```
+Internet (ports 80, 443)
+        |
+   nginx-proxy (reverse proxy + SSL termination)
+        |
+   docker network: nginx-proxy
+        |
+   backend containers (discovered via VIRTUAL_HOST)
+```
+
+The proxy uses the Docker socket to automatically detect containers with `VIRTUAL_HOST` set and generates nginx configuration on the fly.

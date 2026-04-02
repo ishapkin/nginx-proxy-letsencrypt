@@ -1,5 +1,6 @@
 .idea
+.env
 htpasswd/*
 vhost.d/*
 !vhost.d/default
- .DS_Store
+.DS_Store
